@@ -76,6 +76,14 @@ WHERE degree > 12 AND producer_id = 24;
 
 -- Find the producer who has produced the highest quantity of wine.
 -- Find the average degree of wine produced.
+SELECT
+AVG (degree) AS Average_degree
+FROM wine
+
 -- Find the oldest wine in the database.
+SELECT
+MIN (year) AS Oldest_wine
+FROM wine
 -- Retrieve a list of producers along with the total quantity of wine they have produced.
+
 -- Retrieve a list of wines along with their producer details
