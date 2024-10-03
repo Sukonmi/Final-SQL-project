@@ -66,4 +66,13 @@ SELECT
   WHERE wine_id = 12;
 
 -- Calculate the quantity of wine produced for each category.
+-- Find producers in the Sousse region who have harvested at least one wine in quantities greater than 300 liters. Display their names and first names, sorted alphabetically.
+-- List the wine numbers with a degree greater than 12, produced by producer number 24.
+SELECT * FROM wine
+WHERE degree > 12 AND producer_id = 24;
 
+-- Find the producer who has produced the highest quantity of wine.
+-- Find the average degree of wine produced.
+-- Find the oldest wine in the database.
+-- Retrieve a list of producers along with the total quantity of wine they have produced.
+-- Retrieve a list of wines along with their producer details
