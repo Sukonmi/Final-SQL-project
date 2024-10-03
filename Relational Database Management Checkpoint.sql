@@ -68,8 +68,11 @@ SELECT
 -- Calculate the quantity of wine produced for each category.
 -- Find producers in the Sousse region who have harvested at least one wine in quantities greater than 300 liters. Display their names and first names, sorted alphabetically.
 -- List the wine numbers with a degree greater than 12, produced by producer number 24.
-SELECT * FROM wine
+SELECT * FROM wine w
+INNER JOIN producer p ON w.producer_id = p.producer_id
 WHERE degree > 12 AND producer_id = 24;
+-- NB: The sythax won't run, because both tables aren't linked via foreign key.
+
 
 -- Find the producer who has produced the highest quantity of wine.
 -- Find the average degree of wine produced.
