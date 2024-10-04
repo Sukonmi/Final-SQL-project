@@ -45,45 +45,58 @@ VALUES
 (12, 'Amelia', 'Thomas', 'Sousse');
 
 
--- Retrieve a list of all producers.
+-- 1. Retrieve a list of all producers.
 SELECT * FROM Producers
 
--- Retrieve a sorted list of producers by name.
+-- 2. Retrieve a sorted list of producers by name.
 SELECT first_name, last_name
 FROM producers
 ORDER BY producer_id DESC;
 
--- Retrieve a list of producers from Sousse.
+-- 3. Retrieve a list of producers from Sousse.
 SELECT first_name, last_name
 FROM producers
 WHERE region = 'Sousse'
 ORDER BY producer_id ASC;
+-- The order by sythax was a little extra i added to make the list more coherent.
 
--- Calculate the total quantity of wine produced with the wine number 12.
+-- 4. Calculate the total quantity of wine produced with the wine number 12.
 SELECT
   SUM(wine_id) AS total_quantity
   FROM wine
   WHERE wine_id = 12;
 
--- Calculate the quantity of wine produced for each category.
--- Find producers in the Sousse region who have harvested at least one wine in quantities greater than 300 liters. Display their names and first names, sorted alphabetically.
--- List the wine numbers with a degree greater than 12, produced by producer number 24.
+-- 5. Calculate the quantity of wine produced for each category.
+-- None of the two tables contain values for quantity, so the question can't be answered.
+
+
+-- 6. Find producers in the Sousse region who have harvested at least one wine in quantities greater than 300 liters. Display their names and first names, sorted alphabetically.
+-- None of the tables given have values for quantity produced so the question can't be answered.
+
+-- 7. List the wine numbers with a degree greater than 12, produced by producer number 24.
 SELECT * FROM wine w
 INNER JOIN producer p ON w.producer_id = p.producer_id
 WHERE degree > 12 AND producer_id = 24;
 -- NB: The sythax won't run, because both tables aren't linked via foreign key.
 
 
--- Find the producer who has produced the highest quantity of wine.
--- Find the average degree of wine produced.
+-- 8. Find the producer who has produced the highest quantity of wine.
+-- Question can't be answered. 
+
+-- 9. Find the average degree of wine produced.
 SELECT
 AVG (degree) AS Average_degree
 FROM wine
 
--- Find the oldest wine in the database.
+-- 10. Find the oldest wine in the database.
 SELECT
 MIN (year) AS Oldest_wine
 FROM wine
--- Retrieve a list of producers along with the total quantity of wine they have produced.
 
--- Retrieve a list of wines along with their producer details
+-- 11. Retrieve a list of producers along with the total quantity of wine they have produced.
+-- Question can't be answered.
+
+-- 12. Retrieve a list of wines along with their producer details
+SELECT * FROM wine w 
+INNER JOIN producers p ON w.producer_id = p.producer_id
+-- Sythax won't run because the tables aren't linked via a foreign key.
