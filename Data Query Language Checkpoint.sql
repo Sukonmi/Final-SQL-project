@@ -88,34 +88,31 @@ SELECT * FROM Order_details
 SELECT * FROM Product_type
 
 -- 6. Retrieve the names of the products that have been ordered by at least one customer, along with the total quantity of each product ordered.
-SELECT 
-  p.product_name, 
-  SUM(od.quantity) AS total_quantity
-FROM 
-  orders o
-  INNER JOIN order_details od ON o.order_id = od.order_id
-  INNER JOIN products p ON od.product_id = p.product_id
-GROUP BY 
-  p.product_name
+SELECT p.product_name, 
+	SUM(od.quantity) AS total_quantity
+FROM orders o
+	INNER JOIN order_details od ON o.order_id = od.order_id
+	INNER JOIN products p ON od.product_id = p.product_id
+GROUP BY p.product_name
 HAVING 
-  SUM(od.quantity) > 0;
+	SUM(od.quantity) > 0;
 
 -- 7. Retrieve the names of the customers who have placed an order on every day of the week, along with the total number of orders placed by each customer.
 SELECT Customer_name, 
-  COUNT(*) AS total_orders
+	COUNT(*) AS total_orders
 FROM customers c
-  JOIN orders o ON c.customer_id = o.customer_id
+	JOIN orders o ON c.customer_id = o.customer_id
 GROUP BY c.customer_name
 HAVING 
-  COUNT(DISTINCT EXTRACT(DOW FROM o.order_date)) = 7;
+	COUNT(DISTINCT EXTRACT(DOW FROM o.order_date)) = 7;
 
 -- 8. Retrieve the names of the customers who have placed the most orders, along with the total number of orders placed by each customer.
 SELECT c.customer_name, 
-  COUNT(*) AS total_orders, 
-  MAX(od.quantity) AS max_quantity
+	COUNT(*) AS total_orders, 
+	MAX(od.quantity) AS max_quantity
 FROM customers c 
-  JOIN orders o ON c.customer_id = o.customer_id
-  JOIN order_details od ON o.order_id = od.order_id
+	JOIN orders o ON c.customer_id = o.customer_id
+	JOIN order_details od ON o.order_id = od.order_id
 GROUP BY c.customer_name;
 
 -- 9. Retrieve the names of the products that have been ordered the most, along with the total quantity of each product ordered.
@@ -123,27 +120,65 @@ SELECT p.product_name,
     COUNT(*) AS total_quantity,
 	MAX(quantity) AS max_quantity
 FROM products p
-   JOIN order_details od ON p.product_id = od.product_id
+	JOIN order_details od ON p.product_id = od.product_id
 GROUP BY p.product_name;
+
 -- 10. Retrieve the names of customers who have placed an order for at least one widget.
 SELECT DISTINCT c.customer_name
 FROM customers c 
-  JOIN orders o ON c.customer_id = o.customer_id
-  JOIN order_details od ON o.order_id = od.order_id
-WHERE od.quantity > 0;
-
--- OR
-
-SELECT c.customer_name
-FROM customers c 
-  JOIN orders o ON c.customer_id = o.customer_id
-  JOIN order_details od ON o.order_id = od.order_id
-GROUP BY c.customer_name
-HAVING 
-  SUM(od.quantity) > 0;
+	JOIN orders o ON c.customer_id = o.customer_id
+	JOIN order_details od ON o.order_id = od.order_id
+	JOIN products p ON od.product_id = p.product_id
+WHERE p.product_id IN (3, 4)
+	AND od.quantity > 0;
   
 -- 11. Retrieve the names of the customers who have placed an order for at least one widget and at least one gadget, along with the total cost of the widgets and gadgets ordered by each customer.
+SELECT c.customer_name,
+	SUM(od.quantity * p.price) AS total_price
+FROM customers c 
+	JOIN orders o ON c.customer_id = o.customer_id
+	JOIN order_details od ON o.order_id = od.order_id
+	JOIN products p ON od.product_id = p.product_id
+WHERE p.product_id IN (1, 2)
+	AND p.product_id IN (3, 4)
+	AND od.quantity > 0
+GROUP BY c.customer_name;
+
 -- 12. Retrieve the names of the customers who have placed an order for at least one gadget, along with the total cost of the gadgets ordered by each customer.
+SELECT c.customer_name, 
+	SUM(od.quantity * p.price) AS total_price
+FROM customers c 
+	JOIN orders o ON c.customer_id = o.customer_id
+	JOIN order_details od ON o.order_id = od.order_id
+	JOIN products p ON od.product_id = p.product_id
+WHERE p.product_id IN (3, 4) 
+	AND od.quantity > 0
+GROUP BY c.customer_name;
+
 -- 13. Retrieve the names of the customers who have placed an order for at least one doohickey, along with the total cost of the doohickeys ordered by each customer.
+SELECT c.customer_name,
+	SUM(od.quantity * p.price) AS total_price
+FROM customers c
+	JOIN orders o ON c.customer_id = o.customer_id
+	JOIN order_details od ON o.order_id = od.order_id
+	JOIN products p ON od.product_id = p.product_id
+WHERE p.product_id = 5
+    AND od.quantity > 0
+GROUP BY c.customer_name;
+
 -- 14. Retrieve the names of the customers who have placed an order every day of the week, along with the total number of orders placed by each customer.
+SELECT Customer_name, 
+  COUNT(*) AS total_orders
+FROM customers c
+  JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_name
+HAVING 
+  COUNT(DISTINCT EXTRACT(DOW FROM o.order_date)) = 7;
+  
 -- 15. Retrieve the total number of widgets and gadgets ordered by each customer, along with the total cost of the orders.
+SELECT p.product_id, p.product_name,
+	SUM(od.quantity * p.price) AS total_cost
+	FROM products p 
+	JOIN order_details od ON p.product_id = od.product_id
+WHERE p.product_id IN (1, 2, 3, 4)
+GROUP BY p.product_id, p.product_name;
