@@ -3467,8 +3467,34 @@ ADD CONSTRAINT FK_PRODUCTS_SUPPLIERS
 FOREIGN KEY (SUPPLIER_NUMBER) REFERENCES SUPPLIERS (SUPPLIER_NUMBER);
 
 -- 1. Display in descending order of seniority the male employees whose net salary (salary + commission) is greater than or equal to 8000. The resulting table should include the following columns: Employee Number, First Name and Last Name (using LPAD or RPAD for formatting), Age, and Seniority.
+SELECT 
+	EMPLOYEE_NUMBER,
+	LPAD(FIRST_NAME, 10, ' ') AS FIRST_NAME,
+	RPAD(LAST_NAME, 15, ' ') AS LAST_NAME,
+	EXTRACT(YEAR FROM AGE(CURRENT_DATE, BIRTH_DATE)) AS AGE,
+	EXTRACT(YEAR FROM AGE(CURRENT_DATE, HIRE_DATE)) AS SENIORITY
+FROM EMPLOYEES
+WHERE TITLE = 'Mr.'
+	AND (SALARY + COALESCE(COMMISSION, 0)) >= 8000
+ORDER BY SENIORITY DESC;
+
 -- 2. Display products that meet the following criteria: (C1) quantity is packaged in bottle(s), (C2) the third character in the product name is 't' or 'T', (C3) supplied by suppliers 1, 2, or 3, (C4) unit price ranges between 70 and 200, and (C5) units ordered are specified (not null). The resulting table should include the following columns: product number, product name, supplier number, units ordered, and unit price.
+SELECT PRODUCT_REF, PRODUCT_NAME, SUPPLIER_NUMBER, UNITS_ON_ORDER, UNIT_PRICE
+FROM PRODUCTS
+WHERE QUANTITY LIKE '%bottle%' 
+  AND SUBSTRING(PRODUCT_NAME FROM 3 FOR 1) IN ('t', 'T')
+  AND SUPPLIER_NUMBER IN (1, 2, 3)
+  AND UNIT_PRICE BETWEEN 70 AND 200
+  AND UNITS_ON_ORDER IS NOT NULL;
+
 -- 3. Display customers who reside in the same region as supplier 1, meaning they share the same country, city, and the last three digits of the postal code. The query should utilize a single subquery. The resulting table should include all columns from the customer table.
+SELECT * FROM CUSTOMERS
+WHERE (COUNTRY, CITY, SUBSTR(POSTAL_CODE, -3)) 
+	IN (SELECT COUNTRY, CITY, SUBSTR(POSTAL_CODE, -3)
+    FROM SUPPLIERS
+WHERE SUPPLIER_NUMBER = 1
+);
+
 -- 4. For each order number between 10998 and 11003, do the following:  
 -- 4(i) Display the new discount rate, which should be 0% if the total order amount before discount (unit price * quantity) is between 0 and 2000, 5% if between 2001 and 10000, 10% if between 10001 and 40000, 15% if between 40001 and 80000, and 20% otherwise.
 -- 4(ii) Display the message "apply old discount rate" if the order number is between 10000 and 10999, and "apply new discount rate" otherwise. The resulting table should display the columns: order number, new discount rate, and discount rate application note.
@@ -3476,8 +3502,34 @@ FOREIGN KEY (SUPPLIER_NUMBER) REFERENCES SUPPLIERS (SUPPLIER_NUMBER);
 -- 6. Display customers from Berlin who have ordered at most 1 (0 or 1) dessert product. The resulting table should display the column: customer code.
 -- 7. Display customers who reside in France and the total amount of orders they placed every Monday in April 1998 (considering customers who haven't placed any orders yet). The resulting table should display the columns: customer number, company name, phone number, total amount, and country.
 -- 8. Display customers who have ordered all products. The resulting table should display the columns: customer code, company name, and telephone number.
+SELECT * FROM order_details
+SELECT C.CUSTOMER_CODE, C.COMPANY, C.PHONE
+	FROM CUSTOMERS C
+	JOIN ORDERS O ON C.CUSTOMER_CODE = O.CUSTOMER_CODE
+	JOIN ORDER_DETAILS OD ON O.ORDER_NUMBER = OD.ORDER_NUMBER
+	JOIN PRODUCTS P ON OD.PRODUCT_REF = P.PRODUCT_REF
+	JOIN SUPPLIERS S ON P.SUPPLIER_NUMBER = S.SUPPLIER_NUMBER
+WHERE PRODUCT_REF = (*)
+
 -- 9. Display for each customer from France the number of orders they have placed. The resulting table should display the columns: customer code and number of orders.
+SELECT C.CUSTOMER_CODE,
+  COUNT(O.ORDER_NUMBER) AS "NUMBER OF ORDERS"
+FROM CUSTOMERS C
+	JOIN ORDERS O ON C.CUSTOMER_CODE = O.CUSTOMER_CODE
+WHERE C.COUNTRY = 'France'
+GROUP BY C.CUSTOMER_CODE
+ORDER BY "NUMBER OF ORDERS" DESC;
+
 -- 10. Display the number of orders placed in 1996, the number of orders placed in 1997, and the difference between these two numbers. The resulting table should display the columns: orders in 1996, orders in 1997, and Difference.
- 
+SELECT 
+  SUM(CASE WHEN EXTRACT(YEAR FROM O.ORDER_DATE) = 1996 THEN OD.QUANTITY ELSE 0 END) AS "QUANTITY PURCHASED IN 1996",
+  SUM(CASE WHEN EXTRACT(YEAR FROM O.ORDER_DATE) = 1997 THEN OD.QUANTITY ELSE 0 END) AS "QUANTITY PURCHASED IN 1997",
+  SUM(CASE WHEN EXTRACT(YEAR FROM O.ORDER_DATE) = 1996 THEN OD.QUANTITY ELSE 0 END) - 
+  SUM(CASE WHEN EXTRACT(YEAR FROM O.ORDER_DATE) = 1997 THEN OD.QUANTITY ELSE 0 END) AS "DIFFERENCE"
+FROM ORDERS O
+	JOIN ORDER_DETAILS OD ON O.ORDER_NUMBER = OD.ORDER_NUMBER
+WHERE EXTRACT(YEAR FROM O.ORDER_DATE) IN (1996, 1997);
+
+
 
 
