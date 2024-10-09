@@ -3499,17 +3499,32 @@ WHERE SUPPLIER_NUMBER = 1
 -- 4(i) Display the new discount rate, which should be 0% if the total order amount before discount (unit price * quantity) is between 0 and 2000, 5% if between 2001 and 10000, 10% if between 10001 and 40000, 15% if between 40001 and 80000, and 20% otherwise.
 -- 4(ii) Display the message "apply old discount rate" if the order number is between 10000 and 10999, and "apply new discount rate" otherwise. The resulting table should display the columns: order number, new discount rate, and discount rate application note.
 -- 5. Display suppliers of beverage products. The resulting table should display the columns: supplier number, company, address, and phone number.
+SELECT S.SUPPLIER NUMBER, S.COMPANY, S.ADDRESS, S.PHONE
+	FROM SUPPLIERS S
+SELECT * FROM PRODUCTS
 -- 6. Display customers from Berlin who have ordered at most 1 (0 or 1) dessert product. The resulting table should display the column: customer code.
 -- 7. Display customers who reside in France and the total amount of orders they placed every Monday in April 1998 (considering customers who haven't placed any orders yet). The resulting table should display the columns: customer number, company name, phone number, total amount, and country.
--- 8. Display customers who have ordered all products. The resulting table should display the columns: customer code, company name, and telephone number.
-SELECT * FROM order_details
-SELECT C.CUSTOMER_CODE, C.COMPANY, C.PHONE
-	FROM CUSTOMERS C
+SELECT C.CUSTOMER_CODE, C.COMPANY, C.PHONE,
+	COALESCE(SUM(OD.QUANTITY * OD.UNIT_PRICE), 0) AS "TOTAL AMOUNT", C.COUNTRY
+FROM CUSTOMERS C
 	JOIN ORDERS O ON C.CUSTOMER_CODE = O.CUSTOMER_CODE
 	JOIN ORDER_DETAILS OD ON O.ORDER_NUMBER = OD.ORDER_NUMBER
-	JOIN PRODUCTS P ON OD.PRODUCT_REF = P.PRODUCT_REF
-	JOIN SUPPLIERS S ON P.SUPPLIER_NUMBER = S.SUPPLIER_NUMBER
-WHERE PRODUCT_REF = (*)
+WHERE C.COUNTRY = 'France'
+	AND EXTRACT(YEAR FROM O.ORDER_DATE) = 1998
+	AND EXTRACT(MONTH FROM O.ORDER_DATE) = 4
+	AND EXTRACT(DOW FROM O.ORDER_DATE) = 1  
+GROUP BY C.CUSTOMER_CODE, C.COMPANY, C.PHONE, C.COUNTRY
+ORDER BY "TOTAL AMOUNT" DESC;
+
+-- 8. Display customers who have ordered all products. The resulting table should display the columns: customer code, company name, and telephone number.
+SELECT C.CUSTOMER_CODE, C.COMPANY, C.PHONE
+	FROM CUSTOMERS C
+WHERE C.CUSTOMER_CODE IN ( SELECT O.CUSTOMER_CODE
+    FROM ORDERS O
+    JOIN ORDER_DETAILS OD ON O.ORDER_NUMBER = OD.ORDER_NUMBER
+    GROUP BY O.CUSTOMER_CODE
+HAVING COUNT(DISTINCT OD.PRODUCT_REF) = (SELECT COUNT(*) FROM PRODUCTS)
+);
 
 -- 9. Display for each customer from France the number of orders they have placed. The resulting table should display the columns: customer code and number of orders.
 SELECT C.CUSTOMER_CODE,
