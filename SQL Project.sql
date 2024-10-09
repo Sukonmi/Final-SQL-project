@@ -3489,20 +3489,35 @@ WHERE QUANTITY LIKE '%bottle%'
 
 -- 3. Display customers who reside in the same region as supplier 1, meaning they share the same country, city, and the last three digits of the postal code. The query should utilize a single subquery. The resulting table should include all columns from the customer table.
 SELECT * FROM CUSTOMERS
-WHERE (COUNTRY, CITY, SUBSTR(POSTAL_CODE, -3)) 
+WHERE (COUNTRY, CITY, SUBSTRING(POSTAL_CODE FROM -3 FOR 3)) 
 	IN (SELECT COUNTRY, CITY, SUBSTR(POSTAL_CODE, -3)
     FROM SUPPLIERS
 WHERE SUPPLIER_NUMBER = 1
 );
 
 -- 4. For each order number between 10998 and 11003, do the following:  
--- 4(i) Display the new discount rate, which should be 0% if the total order amount before discount (unit price * quantity) is between 0 and 2000, 5% if between 2001 and 10000, 10% if between 10001 and 40000, 15% if between 40001 and 80000, and 20% otherwise.
--- 4(ii) Display the message "apply old discount rate" if the order number is between 10000 and 10999, and "apply new discount rate" otherwise. The resulting table should display the columns: order number, new discount rate, and discount rate application note.
+-- (i) Display the new discount rate, which should be 0% if the total order amount before discount (unit price * quantity) is between 0 and 2000, 5% if between 2001 and 10000, 10% if between 10001 and 40000, 15% if between 40001 and 80000, and 20% otherwise.
+-- (ii) Display the message "apply old discount rate" if the order number is between 10000 and 10999, and "apply new discount rate" otherwise. The resulting table should display the columns: order number, new discount rate, and discount rate application note.
 -- 5. Display suppliers of beverage products. The resulting table should display the columns: supplier number, company, address, and phone number.
-SELECT S.SUPPLIER NUMBER, S.COMPANY, S.ADDRESS, S.PHONE
+SELECT S.SUPPLIER_NUMBER, S.COMPANY AS "Company", S.ADDRESS, S.PHONE
 	FROM SUPPLIERS S
-SELECT * FROM PRODUCTS
+	JOIN PRODUCTS P ON S.SUPPLIER_NUMBER = P.SUPPLIER_NUMBER
+	JOIN CATEGORIES C ON P.CATEGORY_CODE = C.CATEGORY_CODE
+WHERE C.CATEGORY_NAME = 'Beverages'
+GROUP BY S.SUPPLIER_NUMBER, S.COMPANY, S.ADDRESS, S.PHONE;
+
 -- 6. Display customers from Berlin who have ordered at most 1 (0 or 1) dessert product. The resulting table should display the column: customer code.
+SELECT C.CUSTOMER_CODE
+	FROM CUSTOMERS C
+	JOIN ORDERS O ON C.CUSTOMER_CODE = O.CUSTOMER_CODE
+	JOIN ORDER_DETAILS OD ON O.ORDER_NUMBER = OD.ORDER_NUMBER
+	JOIN PRODUCTS P ON OD.PRODUCT_REF = P.PRODUCT_REF
+	JOIN CATEGORIES CA ON P.CATEGORY_CODE = CA.CATEGORY_CODE
+WHERE C.CITY = 'Berlin'
+	AND CA.CATEGORY_NAME = 'Desserts'
+GROUP BY C.CUSTOMER_CODE
+HAVING SUM(CASE WHEN CA.CATEGORY_NAME = 'Desserts' THEN 1 ELSE 0 END) <= 1;
+
 -- 7. Display customers who reside in France and the total amount of orders they placed every Monday in April 1998 (considering customers who haven't placed any orders yet). The resulting table should display the columns: customer number, company name, phone number, total amount, and country.
 SELECT C.CUSTOMER_CODE, C.COMPANY, C.PHONE,
 	COALESCE(SUM(OD.QUANTITY * OD.UNIT_PRICE), 0) AS "TOTAL AMOUNT", C.COUNTRY
