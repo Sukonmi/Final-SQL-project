@@ -3498,6 +3498,21 @@ WHERE SUPPLIER_NUMBER = 1
 -- 4. For each order number between 10998 and 11003, do the following:  
 -- (i) Display the new discount rate, which should be 0% if the total order amount before discount (unit price * quantity) is between 0 and 2000, 5% if between 2001 and 10000, 10% if between 10001 and 40000, 15% if between 40001 and 80000, and 20% otherwise.
 -- (ii) Display the message "apply old discount rate" if the order number is between 10000 and 10999, and "apply new discount rate" otherwise. The resulting table should display the columns: order number, new discount rate, and discount rate application note.
+SELECT ORDER_NUMBER,
+  CASE 
+    WHEN (UNIT_PRICE * QUANTITY) BETWEEN 0 AND 2000 THEN '0%'
+    WHEN (UNIT_PRICE * QUANTITY) BETWEEN 2001 AND 10000 THEN '5%'
+    WHEN (UNIT_PRICE * QUANTITY) BETWEEN 10001 AND 40000 THEN '10%'
+    WHEN (UNIT_PRICE * QUANTITY) BETWEEN 40001 AND 80000 THEN '15%'
+    ELSE '20%'
+  END AS NEW_DISCOUNT_RATE,
+  CASE 
+    WHEN ORDER_NUMBER BETWEEN 10000 AND 10999 THEN 'APPLY_OLD_DISCOUNT_RATE'
+    ELSE 'APPLY_NEW_DISCOUNT_RATE'
+  END AS DISCOUNT_RATE_APPLICATION
+FROM ORDER_DETAILS
+GROUP BY ORDER_NUMBER, NEW_DISCOUNT_RATE, DISCOUNT_RATE_APPLICATION;
+
 -- 5. Display suppliers of beverage products. The resulting table should display the columns: supplier number, company, address, and phone number.
 SELECT S.SUPPLIER_NUMBER, S.COMPANY AS "Company", S.ADDRESS, S.PHONE
 	FROM SUPPLIERS S
